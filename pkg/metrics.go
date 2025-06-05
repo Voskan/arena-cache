@@ -1,5 +1,8 @@
 package cache
 
+// Package metrics provides metrics collection for arena-cache.
+// It supports Prometheus integration and custom metrics.
+
 // metrics.go contains a thin abstraction over Prometheus so that arena-cache
 // can be used with or without metrics.  When the user passes a *prometheus.Registry
 // in New(..., WithMetrics(reg)), we create labeled metrics and expose them via

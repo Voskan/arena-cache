@@ -1,5 +1,8 @@
 package cache
 
+// Package cache provides the main cache implementation for arena-cache.
+// It manages sharded cache entries and their lifecycle.
+
 // shard.go contains the sharded segment of arena‑cache. A Cache is split into N
 // independent shards to minimise lock contention.  Each shard keeps its own
 // key‑>entry index, CLOCK‑Pro metadata ring and pointer to the current

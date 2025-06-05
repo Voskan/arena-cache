@@ -1,5 +1,8 @@
 package cache
 
+// Package config contains configuration options for arena-cache.
+// It defines default settings and allows customization.
+
 // config.go defines the internal configuration object and the set of
 // functional options that can be passed to New[K,V].  A generic Option is used
 // so that callbacks retain full type‑safety with respect to the concrete value

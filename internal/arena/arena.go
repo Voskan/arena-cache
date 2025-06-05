@@ -1,6 +1,9 @@
 //go:build goexperiment.arenas
 // +build goexperiment.arenas
 
+// Package arena provides a thin wrapper around Go's experimental arena package.
+// It simplifies the API for use in arena-cache.
+
 // Package erena wraps Go 1.24's standard `arena` experimental package and
 // hides its verbose low‑level API behind a tiny, stable surface suited for the
 // needs of arena‑cache.  We expose only the primitives required:
@@ -53,8 +56,8 @@ func (a *Arena) Free() {
 	a.ar = arena.Arena{} // Reset the arena to a new instance
 }
 
-// New allocates zero‑initialised T inside the arena and returns a pointer to
-// it.  The pointer is valid until Free() on the arena.
+// NewValue allocates zero‑initialised T inside the arena and returns a pointer to it.
+// The pointer is valid until Free() on the arena.
 func NewValue[T any](a *Arena) *T { return arena.New[T](&a.ar) }
 
 // MakeSlice allocates a slice of length==cap==n inside the arena and returns

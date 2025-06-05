@@ -1,7 +1,5 @@
-// Package unsafehelpers centralises **all** unavoidable usage of the
-// `unsafe` standard‑library package so that the rest of arena‑cache stays clean
-// and easier to audit.  Every helper is documented with clear pre‑/post‑
-// conditions.
+// Package unsafehelpers centralizes the use of the unsafe package in arena-cache.
+// It provides helpers for zero-allocation conversions.
 //
 // ⚠️  **DISCLAIMER**   These helpers deliberately break the Go memory‑safety
 // model for the sake of zero‑allocation conversions.  Use ONLY inside this

@@ -1,5 +1,8 @@
 package cache
 
+// Package loaderfunc defines the LoaderFunc type used in arena-cache.
+// It specifies the signature for cache loading functions.
+
 // loaderfunc.go defines LoaderFunc – the user‑supplied callback that produces a
 // value when Cache.GetOrLoad misses.  We place it in its own file so that it
 // can be imported by multiple sub‑packages (cache.go, loader.go, etc.) without

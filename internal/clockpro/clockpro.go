@@ -1,5 +1,5 @@
-// Package clockpro contains a **self‑contained, lock‑free implementation of
-// the CLOCK‑Pro page‑replacement algorithm** adapted for in‑process caches.
+// Package clockpro implements the CLOCK-Pro replacement policy for cache management.
+// It is used to manage cache entries in arena-cache.
 //
 // Reference: Qingqing He, Jun Wang, "CLOCK‑Pro: An Effective Improvement of
 // the CLOCK Replacement", USENIX 2005.

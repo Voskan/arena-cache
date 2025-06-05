@@ -1,6 +1,5 @@
-// Package genring maintains a circular buffer ("ring") of *generations* –
-// time‑bounded arenas used by arena‑cache to implement O(1) TTL expiration and
-// bulk memory release.
+// Package genring maintains a circular buffer of generations for arena-cache.
+// It handles TTL expiration and bulk memory release.
 //
 // A *generation* owns:
 //   • an arena (outside GC‑heap) where values are allocated;
