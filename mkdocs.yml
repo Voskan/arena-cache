@@ -1,0 +1,27 @@
+site_name: arena-cache Documentation
+
+nav:
+  - Home: index.md
+  - API: docs/api.md
+  - Architecture: docs/architecture.md
+  - Contributing Guide: docs/contributing-guide.md
+  - Design Decisions: docs/design-decisions.md
+  - Performance: docs/performance.md
+
+theme:
+  name: material
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - tables
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - pymdownx.superfences
+
+extra_css:
+  - "stylesheets/extra.css"
+
+extra_javascript:
+  - "javascripts/extra.js"
