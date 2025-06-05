@@ -1,17 +1,16 @@
 ##
 # GoReleaser v2 configuration for arena-cache
 # -------------------------------------------
-# Generates cross-compiled binaries for the CLI tool `arena-cache-inspect`,
-# archives them, cosigns the checksum file, and attaches everything to a
-# GitHub Release.  Multi-arch Docker images are built separately in the
-# workflow.
+# Builds multi-platform binaries for `arena-cache-inspect`, creates archives,
+# signs the checksum file with Cosign, and attaches everything to a GitHub
+# release.  Docker images are built in the workflow, not here.
 ##
 
 version: 2
 project_name: arena-cache-inspect
 
 env:
-  - CGO_ENABLED=0 # static build for every OS/arch
+  - CGO_ENABLED=0 # static build
 
 # ────────────────────────────────────────────────────────────────
 # Builds
@@ -61,26 +60,29 @@ signs:
 release:
   name_template: v{{ .Version }}
   draft: false
-  changelog:
-    use: git
-    sort: asc
-    filters:
-      exclude:
-        - "^docs:.*"
-        - "^chore:.*"
-        - "^ci:.*"
-        - "^build:deps.*"
+
+# Separate changelog section (root-level in v2).
+changelog:
+  use: git
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:.*"
+      - "^chore:.*"
+      - "^ci:.*"
+      - "^build:deps.*"
 
 # ────────────────────────────────────────────────────────────────
-# Homebrew tap (optional)
+# Homebrew tap
 # ────────────────────────────────────────────────────────────────
 brews:
-  - name: homebrew-tap
-    tap:
+  - repository:
       owner: "{{ .GithubOwner }}"
+      name: homebrew-tap
     commit_author:
       name: GitHub Actions
       email: actions@github.com
+    commit_msg_template: "brew: update {{ .ProjectName }} to {{ .Tag }}"
     description: arena-cache inspector CLI
     homepage: "https://github.com/{{ .GithubOwner }}/arena-cache-inspect"
     test: arena-cache-inspect -h
