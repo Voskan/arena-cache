@@ -63,6 +63,8 @@ var ds = func() []uint64 {
     return arr
 }()
 
+var rng = rand.New(rand.NewSource(42))
+
 /* -------------------------------------------------------------------------
    Benchmarks
    ------------------------------------------------------------------------- */
@@ -146,6 +148,5 @@ func BenchmarkGetOrLoad(b *testing.B) {
    ------------------------------------------------------------------------- */
 
 func init() {
-    rand.Seed(42)
     runtime.GOMAXPROCS(runtime.NumCPU())
 }
