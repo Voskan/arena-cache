@@ -30,14 +30,20 @@ import "unsafe"
 //
 // DO NOT expose the returned string outside controlled scopes.
 func BytesToString(b []byte) string {
+    if len(b) == 0 {
+        return ""
+    }
     return unsafe.String(&b[0], len(b))
 }
 
 // StringToBytes re-interprets string data as a byte slice using unsafe.Pointer.
 // The slice MUST remain read-only; writing to it will mutate immutable string storage and crash in future versions of Go.
 func StringToBytes(s string) []byte {
-    strHdr := (*[2]uintptr)(unsafe.Pointer(&s))
-    return unsafe.Slice((*byte)(unsafe.Pointer(strHdr[0])), strHdr[1])
+    if len(s) == 0 {
+        return nil
+    }
+    ptr := unsafe.StringData(s)
+    return unsafe.Slice(ptr, len(s))
 }
 
 /* -------------------------------------------------------------------------

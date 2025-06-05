@@ -49,7 +49,7 @@ jobs:
 
       - name: 🧪 Test (race + cover)
         run: |
-          go test ./... -race -coverprofile=coverage.out
+          go test ./... -tags=goexperiment.arenas -race -coverprofile=coverage.out
 
       - name: ⬆️ Upload coverage
         uses: actions/upload-artifact@v4
