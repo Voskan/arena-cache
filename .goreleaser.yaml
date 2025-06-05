@@ -51,8 +51,8 @@ signs:
     args:
       - sign
       - --key=$COSIGN_PRIVATE_KEY
-      - "{{ .ArtifactPath }}"
-    signature: "{{ .ArtifactPath }}.sig"
+      - "{{ .Path }}"
+    signature: "{{ .Path }}.sig"
 
 # ────────────────────────────────────────────────────────────────
 # GitHub Release
