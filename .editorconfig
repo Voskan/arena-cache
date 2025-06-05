@@ -1,0 +1,52 @@
+# EditorConfig helps maintain consistent coding style across editors and IDEs.
+# Docs: https://EditorConfig.org
+
+root = true
+
+###############################
+# Global defaults             #
+###############################
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+###############################
+# Go source files             #
+###############################
+[*.go]
+# Go tooling formats with tabs; keep default to respect `go fmt`.
+indent_style = tab
+indent_size = tab
+
+###############################
+# YAML / Markdown / Makefile  #
+###############################
+[{*.yml,*.yaml,*.md,Makefile,*.mk}]
+indent_style = space
+indent_size = 2
+
+###############################
+# Dockerfiles                 #
+###############################
+[Dockerfile*]
+indent_style = space
+indent_size = 2
+
+###############################
+# Shell scripts               #
+###############################
+[*.sh]
+indent_style = space
+indent_size = 2
+
+###############################
+# JSON (including .json files) #
+###############################
+[*.json]
+indent_style = space
+indent_size = 2

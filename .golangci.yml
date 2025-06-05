@@ -1,0 +1,74 @@
+# golangci-lint configuration for arena-cache
+# -------------------------------------------
+# Running locally:  golangci-lint run --config .golangci.yml ./...
+# CI: invoked via Makefile → `lint` target and GitHub Actions.
+#
+# The config opts for *strict* settings to catch issues early while ignoring
+# irrelevant generated/benchmark/example code.
+#
+# Go version is fixed via `go` directive in go.mod (1.24).  golangci-lint will
+# auto‑detect.
+#
+# docs: https://golangci-lint.run/usage/configuration/
+
+run:
+  timeout: 5m
+  concurrency: 4
+  modules-download-mode: readonly
+  skip-dirs:
+    - build 
+    - docs
+    - \.github
+  skip-files:
+    - "_test\.go$"        # unit tests are allowed to break some rules
+
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - errcheck
+    - revive
+    - ineffassign
+    - unused
+    - gosec
+    - depguard
+    - dupl
+    - gocyclo
+    - stylecheck
+  disable:
+    - gokrevive       # overlap with revive rules
+    - golint          # deprecated (use revive/stylecheck)
+
+linters-settings:
+  revive:
+    ignore-generated-header: true
+    severity: warning
+    confidence: 0.8
+    rules:
+      - name: blank-imports
+        severity: error
+      - name: line-length-limit
+        arguments: [120]
+  gosec:
+    # Mark unhandled errors and insecure APIs as build errors, but ignore some
+    # noise for CLI/demo code.
+    severity: error
+    excludes:
+      - G204 # crypto/rand not used → ignore
+      - G304 # file path provided as taint input
+  depguard:
+    list-type: blacklist
+    packages:
+      - fmt
+    packages-with-error-message:
+      fmt: "Use zap.SugaredLogger instead of fmt for structured logs"
+  gocyclo:
+    min-complexity: 20
+
+issues:
+  exclude-use-default: false
+  exclude:
+    - "should have a comment"      # allow private identifiers without godoc
+    - "blank import"               # managed by revive rule above
+  max-issues-per-linter: 0
+  max-same-issues: 0

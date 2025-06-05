@@ -1,0 +1,37 @@
+# General
+*.log
+*.tmp
+*.out
+.DS_Store
+.idea/
+.vscode/
+bin/
+coverage.out
+bench.txt
+
+# Go
+**/vendor/
+**/testdata/
+
+# Build artifacts
+/out/
+/dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Generated docs
+site/
+
+# Docker
+**/l2/
+
+# Ignore GoReleaser build directory (if local)
+release/
+
+# Editor backup files
+*~
+*.swp
+*.swo

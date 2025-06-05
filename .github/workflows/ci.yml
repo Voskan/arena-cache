@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version: ["1.24.0"]
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: ✨ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🧰 Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          check-latest: true
+
+      - name: 📦 Cache build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: 🔍 go vet
+        run: go vet ./...
+
+      - name: 🕵️ staticcheck
+        uses: dominikh/staticcheck-action@v1
+        with:
+          version: "2023.1.6"
+
+      - name: 🧪 Test (race + cover)
+        run: |
+          go test ./... -race -coverprofile=coverage.out
+
+      - name: ⬆️ Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.os }}
+          path: coverage.out
+
+  bench:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.24.0
+
+      - name: Install benchstat
+        run: go install golang.org/x/perf/cmd/benchstat@latest
+
+      - name: Run benchmarks (PR)
+        id: prbench
+        run: go test ./bench -bench=. -run=^$ -benchmem > pr.bench
+
+      - name: Upload benchmark artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-bench
+          path: pr.bench
+
+      - name: Download baseline benchmark
+        if: github.base_ref == 'main'
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: ci.yml
+          branch: main
+          name: main-bench
+          path: .
+
+      - name: Compare benchstat and comment
+        if: success() && github.base_ref == 'main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo '```' > diff.txt
+          benchstat main.bench pr.bench >> diff.txt
+          echo '```' >> diff.txt
+          gh pr comment ${{ github.event.pull_request.number }} -F diff.txt
+
+      - name: Save benchmarks as baseline (main)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-bench
+          path: pr.bench

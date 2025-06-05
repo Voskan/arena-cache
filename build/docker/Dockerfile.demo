@@ -1,0 +1,46 @@
+# syntax=docker/dockerfile:1
+
+###############################################################################
+# Demo container: runs examples/basic for docker‑compose playground            #
+###############################################################################
+#   Stage 1 – builder:                                                         
+#     * Alpine + Go 1.24                                                       
+#     * CGO disabled, static binary                                            
+#   Stage 2 – runtime:                                                         
+#     * scratch + CA certs + static binary                                     
+#                                                                              
+# Image size: ≈ 9 MB                                                           
+###############################################################################
+
+ARG GO_VERSION=1.24.0
+ARG ALPINE_VERSION=3.19
+
+############################## 1. Builder stage ################################
+FROM golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS builder
+
+RUN apk add --no-cache ca-certificates build-base git
+WORKDIR /src
+
+# Copy go.mod/go.sum first for better cache utilisation, then the rest.
+COPY go.mod .
+COPY go.sum .
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    go mod download
+
+COPY . .
+
+ARG VERSION=dev
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=linux \
+    go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" \
+      -o /out/demo ./examples/basic
+
+############################## 2. Runtime stage ################################
+FROM scratch
+
+COPY --from=builder /out/demo /usr/local/bin/demo
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+EXPOSE 6060
+ENTRYPOINT ["/usr/local/bin/demo"]

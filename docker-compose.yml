@@ -1,0 +1,39 @@
+version: "3.9"
+
+################################################################################
+# Local playground for arena‑cache                                             #
+#                                                                              #
+#  • demo         – tiny HTTP server powered by arena‑cache (examples/basic)   #
+#  • prometheus   – scrapes demo :6060/metrics                                 #
+#  • inspector    – watches demo and prints live stats to stdout               #
+#                                                                              #
+# Run:
+#   docker compose up --build                                                   #
+# Then:
+#   open http://localhost:9090  (Prometheus UI)
+#   inspector logs show hits/misses every 2s
+################################################################################
+
+services:
+  demo:
+    build:
+      context: .
+      dockerfile: build/docker/Dockerfile.demo
+      args:
+        GO_VERSION: 1.24.0
+    ports:
+      - "6060:6060" # HTTP endpoint with /metrics + /debug/arena‑cache/snapshot
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    volumes:
+      - ./build/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command: ["--config.file=/etc/prometheus/prometheus.yml"]
+    ports:
+      - "9090:9090"
+
+  inspector:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/arena-cache-inspect:latest
+    command: ["-addr", "http://demo:6060", "-watch", "-interval", "2s"]
+    depends_on:
+      - demo
