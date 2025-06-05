@@ -40,7 +40,7 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: 🔍 go vet
-        run: go vet ./...
+        run: go vet -tags=goexperiment.arenas ./...
 
       - name: 🕵️ staticcheck
         uses: dominikh/staticcheck-action@v1
