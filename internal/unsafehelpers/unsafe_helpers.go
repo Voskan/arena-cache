@@ -33,9 +33,8 @@ func BytesToString(b []byte) string {
     return unsafe.String(&b[0], len(b))
 }
 
-// StringToBytes is the opposite direction: it re‑interprets string data as a
-// byte slice.  The slice MUST remain read‑only; writing to it will mutate
-// immutable string storage and crash in future versions of Go.
+// StringToBytes re-interprets string data as a byte slice using unsafe.Pointer.
+// The slice MUST remain read-only; writing to it will mutate immutable string storage and crash in future versions of Go.
 func StringToBytes(s string) []byte {
     strHdr := (*[2]uintptr)(unsafe.Pointer(&s))
     return unsafe.Slice((*byte)(unsafe.Pointer(strHdr[0])), strHdr[1])
