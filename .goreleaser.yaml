@@ -45,15 +45,14 @@ checksum:
   name_template: checksums.txt
 
 signs:
-  - cmd: cosign
-    stdin: "{{ .Env.COSIGN_PWD }}"
+  - id: cosign
+    artifacts: checksum
+    cmd: cosign
     args:
-      - "sign-blob"
-      - "--key=cosign.key"
-      - "--output-signature=${signature}"
-      - "${artifact}"
-      - "--yes"
-    artifacts: all
+      - sign-blob
+      - --key=cosign.key
+      - --output-signature={{ .Path }}.sig
+      - { { .Path } }
 
 # ────────────────────────────────────────────────────────────────
 # GitHub Release
