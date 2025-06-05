@@ -51,8 +51,12 @@ jobs:
           go install github.com/sigstore/cosign/v2/cmd/cosign@v2.2.3
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
-      - name: 🔑 Generate ephemeral cosign key (no password)
-        run: cosign generate-key-pair -k cosign.key -p ""
+      - name: 🔑 Generate cosign key-pair (no password)
+        run: |
+          export COSIGN_PASSWORD=""
+          cosign generate-key-pair \
+            --key cosign.key \
+            --yes
 
       # ————————————————————————————————————————————————
       # Install GoReleaser
