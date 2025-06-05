@@ -1,4 +1,5 @@
 //go:build goexperiment.arenas
+// +build goexperiment.arenas
 
 // Package erena wraps Go 1.24's standard `arena` experimental package and
 // hides its verbose low‑level API behind a tiny, stable surface suited for the
