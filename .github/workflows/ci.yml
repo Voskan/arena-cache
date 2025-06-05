@@ -46,6 +46,7 @@ jobs:
         uses: dominikh/staticcheck-action@v1
         with:
           version: "2023.1.6"
+          args: "-tags=goexperiment.arenas ./..."
 
       - name: 🧪 Test (race + cover)
         run: |
