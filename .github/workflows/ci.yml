@@ -45,10 +45,12 @@ jobs:
       - name: 🕵️ staticcheck
         uses: dominikh/staticcheck-action@v1
         with:
-          version: "2025.1.0"
+          version: "latest"
           build-tags: "goexperiment.arenas"
+          args: "-tags=goexperiment.arenas ./..."
         env:
           GOEXPERIMENT: "arenas"
+          GOVERSION: "1.24.0"
 
       - name: 🧪 Test (race + cover)
         run: |
