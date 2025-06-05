@@ -1,28 +1,21 @@
 ##
-# GoReleaser configuration for arena-cache
-# ----------------------------------------
-# Generates cross‑compiled binaries for the CLI tool `arena-cache-inspect`,
-# calculates checksums, signs with cosign provenance, and creates a GitHub
-# Release including a generated changelog section.
-#
-# This file is consumed by `.github/workflows/release.yml`.
-# Requires GoReleaser v2.9.0+ (version pinned in CI).
+# GoReleaser v2 configuration for arena-cache
+# -------------------------------------------
+# Generates cross-compiled binaries for the CLI tool `arena-cache-inspect`,
+# archives them, cosigns the checksum file, and attaches everything to a
+# GitHub Release.  Multi-arch Docker images are built separately in the
+# workflow.
 ##
 
-# Mandatory root key – keeps breaking changes explicit.
 version: 2
-
 project_name: arena-cache-inspect
 
 env:
-  # Static builds for Linux; on Darwin/Windows we still disable CGO for
-  # simplicity (system certs handled via net package).
-  - CGO_ENABLED=0
+  - CGO_ENABLED=0 # static build for every OS/arch
 
-# ────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────
 # Builds
-# ────────────────────────────────────────────────────────────────────────────
-
+# ────────────────────────────────────────────────────────────────
 builds:
   - id: inspect
     main: ./cmd/arena-cache-inspect
@@ -30,61 +23,43 @@ builds:
     goos: [linux, darwin, windows]
     goarch: [amd64, arm64]
     ldflags:
-      - "-s -w -X main.version={{ .Version }}"
-    # Enable race detector only on amd64 to minimise image size.
-    flags: []
+      - -s -w -X main.version={{ .Version }}
     hooks:
-      pre: |
-        echo "building {{ .ProjectName }} {{ .Version }}"
+      pre: echo "building {{ .ProjectName }} {{ .Version }}"
 
-# ────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────
 # Archives
-# ────────────────────────────────────────────────────────────────────────────
-
+# ────────────────────────────────────────────────────────────────
 archives:
   - id: default
     builds: [inspect]
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - LICENSE
       - README.md
-    replacements:
-      darwin: macOS
-      amd64: x86_64
 
-# ────────────────────────────────────────────────────────────────────────────
-# Checksums & provenance
-# ────────────────────────────────────────────────────────────────────────────
-
+# ────────────────────────────────────────────────────────────────
+# Checksums + Cosign signature
+# ────────────────────────────────────────────────────────────────
 checksum:
-  name_template: "checksums.txt"
+  name_template: checksums.txt
 
-provenance:
-  enabled: true
+signs:
+  - id: cosign
+    artifacts: checksum
+    cmd: cosign
+    args:
+      - sign
+      - --key=$COSIGN_PRIVATE_KEY
+      - "{{ .ArtifactPath }}"
+    signature: "{{ .ArtifactPath }}.sig"
 
-signature:
-  artifacts: checksum
-  cmd: cosign
-  args: ["sign", "--key=$COSIGN_PRIVATE_KEY", "${artifact}"]
-  signature: "${artifact}.sig"
-
-# ────────────────────────────────────────────────────────────────────────────
-# Docker image (multi-arch) – metadata only, build occurs in workflow
-# ────────────────────────────────────────────────────────────────────────────
-
-docker_images:
-  - image_templates:
-      - "ghcr.io/{{ .GithubOwner }}/arena-cache-inspect:{{ .Version }}"
-      - "ghcr.io/{{ .GithubOwner }}/arena-cache-inspect:latest"
-    builds: [inspect]
-
-# ────────────────────────────────────────────────────────────────────────────
-# Release Notes (changelog) – Keep a Changelog format auto generation
-# ────────────────────────────────────────────────────────────────────────────
-
+# ────────────────────────────────────────────────────────────────
+# GitHub Release
+# ────────────────────────────────────────────────────────────────
 release:
-  name_template: "v{{ .Version }}"
+  name_template: v{{ .Version }}
   draft: false
   changelog:
     use: git
@@ -96,18 +71,16 @@ release:
         - "^ci:.*"
         - "^build:deps.*"
 
-# ────────────────────────────────────────────────────────────────────────────
-# Homebrew tap (optional – can be disabled by commenting out)
-# ────────────────────────────────────────────────────────────────────────────
-
+# ────────────────────────────────────────────────────────────────
+# Homebrew tap (optional)
+# ────────────────────────────────────────────────────────────────
 brews:
-  - tap:
+  - name: homebrew-tap
+    tap:
       owner: "{{ .GithubOwner }}"
-      name: homebrew-tap
     commit_author:
       name: GitHub Actions
       email: actions@github.com
-    commit_msg_template: "brew: update {{ .ProjectName }} to {{ .Tag }}"
-    description: "arena-cache inspector CLI"
-    homepage: "https://github.com/{{ .GithubOwner }}/{{ .ProjectName }}"
-    test: "arena-cache-inspect -h"
+    description: arena-cache inspector CLI
+    homepage: "https://github.com/{{ .GithubOwner }}/arena-cache-inspect"
+    test: arena-cache-inspect -h
