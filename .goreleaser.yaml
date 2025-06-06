@@ -1,6 +1,8 @@
-version: "2"
+# .goreleaser.yaml ─ v2 config
+version: 2 # ← без кавычек
 
 project_name: myapp
+
 builds:
   - id: default
     main: ./cmd/myapp/main.go
@@ -10,25 +12,23 @@ checksum:
 
 signs:
   - id: cosign-blob
-    artifacts: checksum # подписываем только файл чек-сумм
+    artifacts: checksum
     cmd: cosign
     args:
       - sign-blob
-      - --yes # автоматическое подтверждение
+      - --yes # ok для cosign v2.*
       - --key=cosign.key
       - --output-signature={{ .ArtifactPath }}.sig
-      - { { .ArtifactPath } }
+      - "{{ .ArtifactPath }}" # ← строка, без лишних пробелов
     env:
       - COSIGN_PASSWORD
 
-# ────────────────────────────────────────────────────────────────
-# GitHub Release
-# ────────────────────────────────────────────────────────────────
+# ───────────────── GitHub Release ─────────────────
 release:
   name_template: v{{ .Version }}
   draft: false
 
-# Separate changelog section (root-level in v2).
+# ───────────────── Changelog ──────────────────────
 changelog:
   use: git
   sort: asc
@@ -39,9 +39,7 @@ changelog:
       - "^ci:.*"
       - "^build:deps.*"
 
-# ────────────────────────────────────────────────────────────────
-# Homebrew tap
-# ────────────────────────────────────────────────────────────────
+# ──────────────── Homebrew tap ────────────────────
 brews:
   - repository:
       owner: "{{ .GithubOwner }}"
