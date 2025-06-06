@@ -98,7 +98,7 @@ jobs:
       - name: Compare benchstat and comment
         if: success() && github.base_ref == 'main'
         env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo '```' > diff.txt
           benchstat main.bench pr.bench >> diff.txt

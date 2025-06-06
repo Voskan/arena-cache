@@ -1,3 +1,6 @@
+# GoReleaser v2 configuration
+version: 2
+
 project_name: arena-cache-inspect
 
 builds:
@@ -9,23 +12,23 @@ checksum:
 
 signs:
   - id: cosign-blob
-    artifacts: checksum
+    artifacts: checksum # подписываем только файл чек-сумм
     cmd: cosign
     args:
       - sign-blob
-      - --yes # ok для cosign v2.*
+      - --yes # поддерживается в cosign v2.x
       - --key=cosign.key
       - --output-signature={{ .ArtifactPath }}.sig
-      - "{{ .ArtifactPath }}" # ← строка, без лишних пробелов
+      - "{{ .ArtifactPath }}"
     env:
       - COSIGN_PASSWORD
 
-# ───────────────── GitHub Release ─────────────────
+# ─────────────── GitHub Release ───────────────
 release:
   name_template: v{{ .Version }}
   draft: false
 
-# ───────────────── Changelog ──────────────────────
+# ──────────────── Changelog ──────────────────
 changelog:
   use: git
   sort: asc
@@ -36,7 +39,7 @@ changelog:
       - "^ci:.*"
       - "^build:deps.*"
 
-# ──────────────── Homebrew tap ────────────────────
+# ────────────── Homebrew tap ─────────────────
 brews:
   - repository:
       owner: "{{ .GithubOwner }}"
