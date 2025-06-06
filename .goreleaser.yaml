@@ -1,7 +1,4 @@
-# .goreleaser.yaml ─ v2 config
-version: 2 # ← без кавычек
-
-project_name: myapp
+project_name: arena-cache-inspect
 
 builds:
   - id: default
