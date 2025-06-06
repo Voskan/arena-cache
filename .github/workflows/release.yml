@@ -1,12 +1,11 @@
 name: Release
-
 on:
   push:
     tags:
       - "v*.*.*"
 
 permissions:
-  contents: write # create release
+  contents: write # create GitHub Release
   packages: write # ghcr.io push
   id-token: write # provenance/SLSA
 
@@ -16,9 +15,7 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      # ————————————————————————————————————————————————
-      # Checkout & Go toolchain
-      # ————————————————————————————————————————————————
+      # ────────────────────────────── Checkout & toolchain ──────────────────────────────
       - name: ✨ Checkout code
         uses: actions/checkout@v4
         with:
@@ -27,53 +24,32 @@ jobs:
       - name: 🧰 Setup Go 1.24
         uses: actions/setup-go@v5
         with:
-          go-version: "1.24.0"
-          check-latest: true
+          go-version: "1.24"
 
-      # ————————————————————————————————————————————————
-      # Build cache
-      # ————————————————————————————————————————————————
-      - name: ♻️ Cache Go build
-        uses: actions/cache@v4
+      # ─────────────────────────────── Install Cosign ────────────────────────────────
+      - name: 🔑 Install Cosign
+        uses: sigstore/cosign-installer@v3.0.5
         with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          cosign-release: v3.1.2 # самая свежая стабильная
 
-      # ————————————————————————————————————————————————
-      # Cosign: install & generate key-pair (no password)
-      # ————————————————————————————————————————————————
-      - name: 📦 Install Cosign
+      # ─────────────────────── Generate Cosign key-pair (idempotent) ───────────────────────
+      - name: 🔐 Generate key pair
+        env:
+          COSIGN_PASSWORD: "" # пустой passphrase → non-interactive
         run: |
-          go install github.com/sigstore/cosign/v2/cmd/cosign@v2.2.3
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          if [[ ! -f cosign.key ]]; then
+            cosign generate-key-pair --yes --output-file cosign
+          fi
+          ls -l cosign.*
 
-      - name: 🔑 Generate cosign key-pair (no password)
-        run: |
-          export COSIGN_PASSWORD=""
-          cosign generate-key-pair \
-            --key cosign.key \
-            --yes
-
-      # ————————————————————————————————————————————————
-      # Install GoReleaser
-      # ————————————————————————————————————————————————
-      - name: 📦 Install GoReleaser
+      # ─────────────────────────────── GoReleaser ────────────────────────────────
+      - name: 🚀 Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:
-          install-only: true
-          version: v2.9.0
-
-      # ————————————————————————————————————————————————
-      # Run GoReleaser
-      # ————————————————————————————————————————————————
-      - name: 🚀 Run GoReleaser
+          version: latest
+          args: release --clean
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: goreleaser release --clean --timeout 60m
+          COSIGN_PASSWORD: "" # нужен для шага sign внутри GoReleaser
 
   docker:
     needs: goreleaser

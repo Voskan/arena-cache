@@ -1,58 +1,25 @@
-##
-# GoReleaser v2 configuration for arena-cache
-# -------------------------------------------
-# Builds multi-platform binaries for `arena-cache-inspect`, creates archives,
-# signs the checksum file with Cosign, and attaches everything to a GitHub
-# release.  Docker images are built in the workflow, not here.
-##
+version: "2"
 
-version: 2
-project_name: arena-cache-inspect
-
-env:
-  - CGO_ENABLED=0 # static build
-
-# ────────────────────────────────────────────────────────────────
-# Builds
-# ────────────────────────────────────────────────────────────────
+project_name: myapp
 builds:
-  - id: inspect
-    main: ./cmd/arena-cache-inspect
-    binary: arena-cache-inspect
-    goos: [linux, darwin, windows]
-    goarch: [amd64, arm64]
-    ldflags:
-      - -s -w -X main.version={{ .Version }}
-    hooks:
-      pre: echo "building {{ .ProjectName }} {{ .Version }}"
-
-# ────────────────────────────────────────────────────────────────
-# Archives
-# ────────────────────────────────────────────────────────────────
-archives:
   - id: default
-    builds: [inspect]
-    format: tar.gz
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    files:
-      - LICENSE
-      - README.md
+    main: ./cmd/myapp/main.go
 
-# ────────────────────────────────────────────────────────────────
-# Checksums + Cosign signature
-# ────────────────────────────────────────────────────────────────
 checksum:
-  name_template: checksums.txt
+  name_template: "{{ .ProjectName }}_checksums.txt"
 
 signs:
-  - id: cosign
-    artifacts: checksum
+  - id: cosign-blob
+    artifacts: checksum # подписываем только файл чек-сумм
     cmd: cosign
     args:
       - sign-blob
+      - --yes # автоматическое подтверждение
       - --key=cosign.key
-      - --output-signature={{ .Path }}.sig
-      - { { .Path } }
+      - --output-signature={{ .ArtifactPath }}.sig
+      - { { .ArtifactPath } }
+    env:
+      - COSIGN_PASSWORD
 
 # ────────────────────────────────────────────────────────────────
 # GitHub Release
