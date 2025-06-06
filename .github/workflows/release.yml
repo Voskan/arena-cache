@@ -38,7 +38,7 @@ jobs:
           COSIGN_PASSWORD: "" # пустой passphrase → non-interactive
         run: |
           if [[ ! -f cosign.key ]]; then
-            cosign generate-key-pair --yes --output-file cosign
+            cosign generate-key-pair --output-file cosign
           fi
           ls -l cosign.*
 
