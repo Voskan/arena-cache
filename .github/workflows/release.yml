@@ -38,7 +38,7 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: 📦 Install goreleaser
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
           install-only: true
           version: v2.9.0
