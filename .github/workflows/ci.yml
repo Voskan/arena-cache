@@ -21,7 +21,7 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     steps:
       - name: ✨ Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🧰 Setup Go ${{ matrix.go-version }}
         uses: actions/setup-go@v5
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-go@v5
         with:
