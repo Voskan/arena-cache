@@ -5,7 +5,7 @@ go 1.24.2
 require (
 	github.com/dgraph-io/badger/v4 v4.7.0
 	github.com/prometheus/client_golang v1.22.0
-	go.uber.org/zap v1.27.0
+	go.uber.org/zap v1.27.1
 	golang.org/x/sync v0.15.0
 )
 
